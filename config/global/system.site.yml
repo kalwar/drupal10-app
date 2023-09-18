@@ -1,0 +1,14 @@
+_core:
+  default_config_hash: VDJxTZtQR21qB4lvOq8zszJZLvLKrSPQpdn2E3T71Ww
+langcode: en
+uuid: 15b65bae-786e-4cdd-8fb5-c97561c74e3e
+name: 'Drush Site-Install'
+mail: admin@example.com
+slogan: 'Drupal is awesome platform'
+page:
+  403: ''
+  404: ''
+  front: /node
+admin_compact_mode: false
+weight_select_max: 100
+default_langcode: en

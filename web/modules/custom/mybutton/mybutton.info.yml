@@ -1,0 +1,4 @@
+name: My Button
+description: A simple button that display a button
+type: module
+core_version_requirement: ^10

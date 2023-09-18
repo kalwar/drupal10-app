@@ -1,0 +1,23 @@
+uuid: eda8d2de-542e-4f87-a549-2ec6fa01feea
+langcode: en
+status: false
+dependencies:
+  module:
+    - search
+  theme:
+    - react_hello
+_core:
+  default_config_hash: F3d5hyAFunLh4PhGviJF019fHn1Z3_zy5gzsQ0tX1K0
+id: react_hello_search
+theme: react_hello
+region: header
+weight: -1
+provider: null
+plugin: search_form_block
+settings:
+  id: search_form_block
+  label: Search
+  label_display: visible
+  provider: search
+  page_id: ''
+visibility: {  }

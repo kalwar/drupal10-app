@@ -1,0 +1,4 @@
+name: Links Module Example
+description: My third custom module for customer
+type: module
+core_version_requirement: ^9 || ^10

@@ -1,0 +1,15 @@
+name: icecream_theme
+description: Just a simple getting started custom theme
+type: theme
+base theme: false
+version: 0.0.1
+core_version_requirement: ^9 || ^10
+libraries:
+  - icecream_theme/global
+
+regions:
+  header: header
+  menu: menu
+  content: content
+  sidebar: sidebar
+  footer: footer

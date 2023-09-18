@@ -1,0 +1,40 @@
+<?php
+
+use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+* Implements hook_form_alter().
+*/
+
+function first_module_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id){
+  if ($form_id = 'user_login_form') {
+    $form['#title'] = t('Login with ice-cream form');
+    $form['name']['#title'] = t('Just insert username');
+  }
+}
+
+/**
+* Implements hook_preprocess_page().
+*/
+
+function first_module_preprocess_page(&$variables) {
+  $variables['first_module_variable'] = 'My first D10 module...';
+}
+
+/**
+* Implements hook_help().
+*/
+
+function first_module_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.first_module':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('This is an first custom module.') . '</p>';
+      return $output;
+
+    default:
+  }
+
+}

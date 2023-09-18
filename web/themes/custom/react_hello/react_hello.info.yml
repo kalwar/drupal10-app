@@ -1,0 +1,8 @@
+name: React Drupal Together
+description: "A theme that loads very simple React JS application"
+type: theme
+base theme: bartik
+core_version_requirement: ^9 || ^10
+
+libraries:
+  - react_hello/react_app
