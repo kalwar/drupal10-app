@@ -8,7 +8,7 @@ jobs:
       - uses: actions/checkout@v1
       - uses: shimataro/ssh-key-action@v2
         with:
-          key: ${{ secrets.PANTHEON_SSH_KEY }}
+          key: ${{ secrets.PANTHEON_PRIVATE_SSH_KEY }}
           config: ${{ secrets.SSH_CONFIG }}
           known_hosts: ${{ secrets.KNOWN_HOSTS }}
       - name: Installing Terminus
