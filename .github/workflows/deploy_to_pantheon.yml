@@ -1,95 +1,36 @@
-name: Deploy to Dev
+name: Build and deploy to pantheon
 
 on:
   push:
-    branches:
-      - "main"
-
-env:
-  php_version: "8.1"
-  pantheon_env: "dev"
-  pantheon_repo: ${{ secrets.PANTHEON_REPO_URL }}
-  pantheon_site_name: ${{ secrets.PANTHEON_SITE_NAME }}
+    branches: [master]
+  workflow_dispatch:
 
 jobs:
-  deploy:
-    name: Deploy to Pantheon Dev
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f # v2.3.4
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@c0c6e403b6c6c44657450627093edddf3b905c5b # 2.9.0
-        env:
-          COMPOSER_TOKEN: ${{ secrets.GH_TOKEN }}
+      - name: checkout code
+        uses: actions/checkout@v3
         with:
-          php-version: ${{ env.php_version }}
-
-      - name: Validate composer.json and composer.lock
-        run: composer validate --strict
-
-      - name: Get Composer cache directory
-        id: composer-cache-dir
-        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
-
-      - name: Cache Composer dependencies
-        uses: actions/cache@0781355a23dac32fd3bac414512f4b903437991a # v2.1.3
-        with:
-          path: ${{ steps.composer-cache-dir.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-composer-
-
-      - name: Avoid GitHub rate limit for Composer
-        run: composer config -g github-oauth.github.com ${{ secrets.GH_TOKEN }}
-
-      - name: Composer install
-        run: composer install --no-dev --no-interaction --no-progress
-
-      - name: Place SSH key
-        uses: shimataro/ssh-key-action@6f350ca8484d8d55c2e361e74d17e638dabe713a # v2.1.0
+          fetch-depth: 0
+      # Use ssh-keygen to generate ssh key
+      # Convert the ssh key to PEM format using ssh-keygen -p -m PEM -f [NAME_OF_SSH_KEY_PLACEHOLDER]
+      # Add private key to repository secret
+      # Add publick key to the server where you want to deploy, in this case pantheon
+      # Ref https://medium.com/swlh/pantheon-and-github-actions-automated-deployments-via-github-actions-c245aa954797
+      - name: Add ssh key
+        uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.PANTHEON_PRIVATE_SSH_KEY }}
           known_hosts: ${{ secrets.KNOWN_HOSTS }}
-
-      - name: Installing Terminus
-        uses: kopepasah/setup-pantheon-terminus@master
-        with:
-          pantheon-machine-token: ${{ secrets.TERMINUS_MACHINE_TOKEN }}
-
-      - name: Prepare code for deployment
+          config: ${{ secrets.SSH_CONFIG }}
+      - name: Validate composer
+        run: composer validate
+      - name: Install dependency
+        run: composer install
+      - name: Deploy the code
         run: |
-          git config --global user.email "santoshkalwar@gmail.com"
-          git config --global user.name "SK github actions"
-          commit_message=$(git log -1 --pretty=%B)
-          rm -rf .git
-          rm -rf .github
-          rm -rf scripts
-          rm -rf web/core/*.txt
-          git init
-          git config --local gc.auto 0
-          git add --force .
-          git commit -m "Automated deploy: $commit_message" >/dev/null
-
-      # - name: Enable maintenance mode
-      #  run: terminus drush -y $pantheon_site_name.$pantheon_env sset system.maintenance_mode 1
-
-      #      - name: Clone database and files from Live
-      #        run: terminus env:clone-content -y $pantheon_site_name.live $pantheon_env
-
-      - name: Clone database and files from Test
-        run: terminus env:clone-content -y $pantheon_site_name.test $pantheon_env
-
-      # - name: Enable maintenance mode again
-      #   run: terminus drush -y $pantheon_site_name.$pantheon_env sset system.maintenance_mode 1
-
-      - name: Push code to Pantheon Dev
-        run: |
-          git remote add pantheon $pantheon_repo
-          git push --force pantheon HEAD:master
-
-      # There is no easy way to know when the code has actually synced to the Pantheon environment so we can't reliably
-      # run Drush commands immediately after pushing code. Thus, we run database updates, import config, and disable
-      # maintenance mode using Pantheon's Quicksilver scripting (see web/private/quicksilver/sync_code.php referenced by
-      # pantheon.yml).
+          git remote add pantheon ${{ secrets.PANTHEON_REPO_URL }}
+          git push pantheon master
+      - name: Deployed status
+        run: echo "Deployed ...."
