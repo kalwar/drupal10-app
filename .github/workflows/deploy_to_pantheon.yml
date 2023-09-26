@@ -21,10 +21,10 @@ jobs:
           pantheon-machine-token: ${{ secrets.TERMINUS_MACHINE_TOKEN }}
       - name: deployer
         env:
-            pantheon_repo: '${{ secrets.PANTHEON_REPO_URL }}'
-            pantheon_site_name: '${{ secrets.PANTHEON_SITE_NAME }}'
-          run: |
-            BASE_BRANCH=${GITHUB_REF##*/}
-            git remote add pantheon $pantheon_repo
-            git push -u pantheon HEAD:refs/heads/$BASE_BRANCH
-            terminus multidev:create $pantheon_site_name.dev $BASE_BRANCH
+          pantheon_repo: "${{ secrets.PANTHEON_REPO_URL }}"
+          pantheon_site_name: "${{ secrets.PANTHEON_SITE_NAME }}"
+        run: |
+          BASE_BRANCH=${GITHUB_REF##*/}
+          git remote add pantheon $pantheon_repo
+          git push -u pantheon HEAD:refs/heads/$BASE_BRANCH
+          terminus multidev:create $pantheon_site_name.dev $BASE_BRANCH
