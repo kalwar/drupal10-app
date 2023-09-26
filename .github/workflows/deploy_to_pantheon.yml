@@ -31,6 +31,6 @@ jobs:
       - name: Deploy the code
         run: |
           git remote add pantheon ${{ secrets.PANTHEON_REPO_URL }}
-          git push pantheon master
+          git push pantheon main
       - name: Deployed status
         run: echo "Deployed ...."
