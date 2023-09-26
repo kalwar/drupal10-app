@@ -30,7 +30,7 @@ on:
         description: Clear target environment cache
 jobs:
   deploy:
-    uses: kalwar/.github/workflows/deploy_to_pantheon.yml@main
+    uses: ./.github/workflows/deploy_to_pantheon.yml@main
     secrets:
       TERMINUS_DOWNSTREAM_SSH_KEY: ${{ secrets.PANTHEON_PRIVATE_SSH_KEY }}
       TERMINUS_MACHINE_TOKEN: ${{ secrets.TERMINUS_MACHINE_TOKEN }}
