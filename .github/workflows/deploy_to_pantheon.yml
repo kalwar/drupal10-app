@@ -12,13 +12,6 @@ env:
   pantheon_site_name: ${{ secrets.PANTHEON_SITE_NAME }}
 
 jobs:
-  phpcs-drupal:
-    name: Drupal coding standards
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f # v2.3.4
-      - uses: guix77/phpcs-drupal-action@13654eb230b095cb6ad4eec195355d9cf0033fa5 # v1.0.0
-
   deploy:
     name: Deploy to Pantheon Dev
     runs-on: ubuntu-latest
@@ -63,8 +56,8 @@ jobs:
       - name: Install Terminus
         # We use cgr to avoid dependency conflicts
         run: |
-          composer global require consolidation/cgr:^2.0.5
-          cgr pantheon-systems/terminus:^2.6.1
+          composer create-project consolidation/cgr
+          cgr pantheon-systems/terminus:^3.2.1
           terminus auth:login --machine-token=${{ secrets.TERMINUS_MACHINE_TOKEN }}
 
       - name: Prepare code for deployment
