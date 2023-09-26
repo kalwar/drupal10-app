@@ -55,7 +55,8 @@ jobs:
 
       - name: Installing Terminus
         uses: kopepasah/setup-pantheon-terminus@master
-        with: terminus auth:login --machine-token=${{ secrets.TERMINUS_MACHINE_TOKEN }}
+        with:
+          pantheon-machine-token: ${{ secrets.TERMINUS_MACHINE_TOKEN }}
 
       - name: Prepare code for deployment
         run: |
