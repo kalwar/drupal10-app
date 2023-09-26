@@ -1,30 +1,59 @@
-name: Deploy master to Pantheon
+name: Deployment to Pantheon
 on:
   push:
     branches:
-      - "dev"
-      - "!master"
+      - main
+env:
+  PANTHEON_SITE: d10live
+  PANTHEON_SITE_ID: 9922391c-3252-4067-95df-665ab4557a2c
+  PANTHEON_ENV: dev
+
+  # note: PATHEON_SITE_ID assumes that your Pantheon Git URL is in the format
+  # ssh://codeserver.dev.[PANTHEON_SITE_ID]@codeserver.dev.[PANTHEON_SITE_ID].drush.in:2222/~/repository.git
+  # If it is not, you'll need to update the below references accordingly to build your Pantheon Git URL.
+  PANTHEON_GIT_USER: codeserver.dev.$PANTHEON_SITE_ID
+  PANTHEON_GIT_HOSTNAME: codeserver.dev.$PANTHEON_SITE_ID.drush.in
+  PANTHEON_GIT_PORT: 2222
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v1
-      - uses: shimataro/ssh-key-action@v2
+      - uses: actions/checkout@v3
         with:
-          key: ${{ secrets.PANTHEON_PRIVATE_SSH_KEY }}
-          config: ${{ secrets.SSH_CONFIG }}
-          known_hosts: ${{ secrets.KNOWN_HOSTS }}
-      - name: Installing Terminus
-        uses: kopepasah/setup-pantheon-terminus@master
+          fetch-depth: 0
+
+      - name: Validate composer.json
+        run: composer validate
+
+      - name: Install SSH Key
+        uses: shimataro/ssh-key-action@v2
         with:
-          pantheon-machine-token: ${{ secrets.TERMINUS_MACHINE_TOKEN }}
-      - name: deployer
-        env:
-          pantheon_repo: "${{ secrets.PANTHEON_REPO_URL }}"
-          pantheon_site_name: "${{ secrets.PANTHEON_SITE_NAME }}"
+          key: ${{ secrets.PANTHEON_SSH_PRIVATE_KEY }}
+          known_hosts: ' '
+
+      - name: Install Terminus
+        uses: pantheon-systems/terminus-github-actions@main
+        with:
+          pantheon-machine-token: ${{ secrets.TERMINUS_TOKEN }}
+
+      - name: Cleanup before Pantheon deploy
         run: |
-          BASE_BRANCH=${GITHUB_REF##*/}
-          git remote add pantheon $pantheon_repo
-          git push -u pantheon HEAD:refs/heads/$BASE_BRANCH
-          terminus multidev:create $pantheon_site_name.dev $BASE_BRANCH
+          echo "Add any additional cleanup/compilation tasks here."
+
+      - name: Add Pantheon Git repository URL as known host
+        run: |
+          ssh-keyscan -t rsa -p ${{ env.PANTHEON_GIT_PORT }} -H ${{ env.PANTHEON_GIT_HOSTNAME }} >> ~/.ssh/known_hosts
+
+      - name: Deploy via commit to Pantheon Git repository URL
+        run: |
+          git remote add pantheon ssh://${{ env.PANTHEON_GIT_USER }}@${{ env.PANTHEON_GIT_HOSTNAME }}:${{ env.PANTHEON_GIT_PORT }}/~/repository.git;
+          git push pantheon HEAD:master --force
+
+      - name: Terminus Drush Updates
+        run: |
+          terminus env:wake ${{ env.PANTHEON_SITE }}.${{ env.PANTHEON_ENV }}
+          terminus env:code-rebuild ${{ env.PANTHEON_SITE }}.${{ env.PANTHEON_ENV }}
+          terminus drush ${{ env.PANTHEON_SITE }}.${{ env.PANTHEON_ENV }} -- deploy
+          terminus env:clear-cache ${{ env.PANTHEON_SITE }}.${{ env.PANTHEON_ENV }}
