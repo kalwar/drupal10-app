@@ -1,5 +1,9 @@
 name: Deploy master to Pantheon
-on: push
+on:
+  push:
+    branches:
+      - "dev"
+      - "!master"
 
 jobs:
   build:
@@ -17,11 +21,10 @@ jobs:
           pantheon-machine-token: ${{ secrets.TERMINUS_MACHINE_TOKEN }}
       - name: deployer
         env:
-          pantheon_repo: "${{ secrets.PANTHEON_REPO_URL }}"
-          pantheon_site_name: "${{ secrets.PANTHEON_SITE_NAME }}"
-        run: |
-          git remote add pantheon $pantheon_repo
-          git push pantheon HEAD:master
-          commit_message=$(git log -1 --pretty=%B)
-          terminus env:deploy $pantheon_site_name.dev --note="Automated deploy: $commit_message"
-          terminus env:deploy $pantheon_site_name.test --note="Automated deploy: $commit_message"
+            pantheon_repo: '${{ secrets.PANTHEON_REPO_URL }}'
+            pantheon_site_name: '${{ secrets.PANTHEON_SITE_NAME }}'
+          run: |
+            BASE_BRANCH=${GITHUB_REF##*/}
+            git remote add pantheon $pantheon_repo
+            git push -u pantheon HEAD:refs/heads/$BASE_BRANCH
+            terminus multidev:create $pantheon_site_name.dev $BASE_BRANCH
