@@ -1,0 +1,9 @@
+react_list.content:
+  path: '/react-list'
+  defaults:
+   _controller: '\Drupal\react_list\Controller\ReactListController::content'
+   _title: 'React List'
+  requirements:
+   _permission: 'access content'
+
+
